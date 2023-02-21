@@ -14,7 +14,6 @@ class User
     public $lastname;
     protected $bdd;
     public $sqlRequest;
-    public $result;
 
     // le constructeur
 
@@ -29,8 +28,6 @@ class User
         } else {
             echo "connexion bdd établie<br>";
         }
-        // $query = "UPDATE utilisateurs SET login ='" . $login . "', prenom ='" . $prenom . "', nom ='" . $nom . "', password ='" . $password . "' WHERE id='" . $id . "'";
-        // mysqli_query($conn, $query);
     }
 
     // les méthodes
@@ -39,30 +36,23 @@ class User
     {
         $this->bdd->query("INSERT INTO utilisateurs (login, password, email, firstname, lastname) VALUES('$login', '$password', '$email', '$firstname', '$lastname')");
 
-        // $this->sqlRequest=('SELECT * FROM utilisateurs');
-        // $utilisateursStatement = $this->bdd->query($this->sqlRequest);
-        // $utilisateurs = $utilisateursStatement->fetch_all(MYSQLI_ASSOC);
-        // var_dump($utilisateurs[0]);
+        $this->sqlRequest = ("SELECT * FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
+        $utilisateursStatement = $this->bdd->query($this->sqlRequest);
+        $utilisateurs = $utilisateursStatement->fetch_array(MYSQLI_ASSOC);
 
         echo 'bien enregistré<br>';
-        // return $utilisateurs[0];
+        return $utilisateurs;
 
-        // -- $this->login;
-        // -- $this->password;
-        // -- $this->email;
-        // -- $this->firstname;
-        // -- $this->lastname;
     }
 
     public function connect($login, $password)
     {
-        $this->sqlRequest = ("SELECT * FROM utilisateurs WHERE login = '$login'");
+        $this->sqlRequest = ("SELECT * FROM utilisateurs WHERE login = '$login' AND password = '$password'");
         $utilisateursStatement = $this->bdd->query($this->sqlRequest);
         $utilisateurs = $utilisateursStatement->fetch_all(MYSQLI_ASSOC);
         $rowcount = mysqli_num_rows($utilisateursStatement);
 
         if ($rowcount > 0) {
-            //   if ($utilisateurs['password'] == $password) {
             $_SESSION['login'] = $login;
             $_SESSION['password'] = $password;
             echo 'bienvenue ' . $_SESSION['login'] . "<br>";
@@ -106,52 +96,50 @@ class User
     {
         $this->sqlRequest = ("SELECT * FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
         $utilisateursStatement = $this->bdd->query($this->sqlRequest);
-        $utilisateurs = $utilisateursStatement->fetch_all(MYSQLI_ASSOC);
-        var_dump($utilisateurs);
-?>
-        <table>
-            <h2>Informations des users</h2>
-
-            <thead>
-                <tr>
-                    <th>login</th>
-                    <th>password</th>
-                    <th>email</th>
-                    <th>firstname</th>
-                    <th>lastname</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                foreach ($utilisateurs as $utilisateur) {
-                ?>
-                    <tr>
-                        <?php echo "<td>" . $utilisateur['login'] . "</td>" ?>
-                        <?php echo "<td>" . $utilisateur['password'] . "</td>" ?>
-                        <?php echo "<td>" . $utilisateur['email'] . "</td>" ?>
-                        <?php echo "<td>" . $utilisateur['firstname'] . "</td>" ?>
-                        <?php echo "<td>" . $utilisateur['lastname'] . "</td>" ?>
-                    <?php
-                }
-                    ?>
-                    </tr>
-            </tbody>
-        </table>
-<?php
+        $utilisateurs = $utilisateursStatement->fetch_array(MYSQLI_ASSOC);
+        // var_dump($utilisateurs);
+        
         return $utilisateurs;
     }
 
     public function getLogin()
     {
-        $this->sqlRequest = ("SELECT * FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
+        $this->sqlRequest = ("SELECT login FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
+        $utilisateursStatement = $this->bdd->query($this->sqlRequest);
+        $utilisateurs = $utilisateursStatement->fetch_array(MYSQLI_ASSOC);
+        
+        return $utilisateurs;
+    }
+
+    public function getEmail()
+    {
+        $this->sqlRequest = ("SELECT email FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
         $utilisateursStatement = $this->bdd->query($this->sqlRequest);
         $utilisateurs = $utilisateursStatement->fetch_all(MYSQLI_ASSOC);
+        
+        return $utilisateurs[0];
+    }
 
-        echo $utilisateurs[0]['email'];
+    public function getFirstname()
+    {
+        $this->sqlRequest = ("SELECT firstname FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
+        $utilisateursStatement = $this->bdd->query($this->sqlRequest);
+        $utilisateurs = $utilisateursStatement->fetch_all(MYSQLI_ASSOC);
+        
+        return $utilisateurs[0];
+    }
+
+    public function getLastname()
+    {
+        $this->sqlRequest = ("SELECT lastname FROM utilisateurs WHERE login = '" . $_SESSION['login'] . "'");
+        $utilisateursStatement = $this->bdd->query($this->sqlRequest);
+        $utilisateurs = $utilisateursStatement->fetch_all(MYSQLI_ASSOC);
+        
+        return $utilisateurs[0];
     }
 }
 
-$newUser = new User;
+$newUser = new User();
 
 // $newUser-> register ('test', 'test', 'test@test.fr', 'test', 'test');
 
@@ -171,8 +159,9 @@ $newUser->getLogin();
 
 // test de message de confirmation Isconnected connecté ou déco
 if ($newUser->isConnected()) {
-    echo 'bien connecté';
+    echo 'bien connecté<br>';
 } else {
-    echo 'vous êtes déco';
+    echo 'vous êtes déco<br>';
 }
 // 
+var_dump($newUser->register('login', 'password', 'email', 'firstname', 'lastname'));
